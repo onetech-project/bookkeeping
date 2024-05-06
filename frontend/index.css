@@ -1,0 +1,15 @@
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 90vw !important;
+}
+
+@media (max-width: 575px) {
+  .flex-xs-column {
+    flex-direction: column !important;
+  }
+}

@@ -45,9 +45,11 @@ connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_DATABASE}`, (er
 })
 
 app.get('/transactions', (req, res) => {
+  const payload = req.query;
+  const size = payload.size || 10;
+  const page = payload.page || 1;
   let queryString = 'SELECT * FROM transactions';
   const where = [];
-  const payload = req.query;
   
   if (payload.type) where.push(`type='${payload.type}'`)
   if (payload.date) {
@@ -55,11 +57,17 @@ app.get('/transactions', (req, res) => {
     where.push(`date BETWEEN '${date[0]}' AND '${date[1]}'`)
   }
 
-  if (where.length > 0) queryString += ` WHERE ${where.join('AND')}`
+  if (where.length > 0) queryString += ` WHERE ${where.join('AND')}`;
+  
+  queryString += ` LIMIT ${size}`;
+  queryString += ` OFFSET ${(page - 1) * size}`;
   
   connection.query(queryString, (error, results) => {
     if (error) return res.status(500).send(`${error.code}: ${error.message}`);
-    return res.send(results);
+    connection.query('SELECT CEILING(COUNT(*) / ?) AS total_pages FROM transactions', [size], (e, r) => {
+      if (e) res.status(500).send(`${e.code}: ${e.message}`);
+      return res.json({ data: results, totalPages: Number(r[0].total_pages) });
+    })
   });
 });
 
