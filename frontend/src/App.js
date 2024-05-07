@@ -51,7 +51,7 @@ const App = () => {
     const method = show.type === 'add' ? 'post' : 'put';
     const body = { date, type, amount, description };
     const options = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
-    const url = show.type === 'add' ? '/transactions' : `/transactions${id}`;
+    const url = show.type === 'add' ? '/transactions' : `/transactions/${id}`;
     axios[method](url, body, options)
       .then(() => {
         handleSearch();
