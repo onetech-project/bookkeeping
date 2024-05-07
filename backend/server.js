@@ -61,6 +61,7 @@ app.get('/transactions', (req, res) => {
   
   queryString += ` LIMIT ${size}`;
   queryString += ` OFFSET ${(page - 1) * size}`;
+  queryString += ` ORDER BY date DESC`;
   
   connection.query(queryString, (error, results) => {
     if (error) return res.status(500).send(`${error.code}: ${error.message}`);
