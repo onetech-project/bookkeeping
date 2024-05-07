@@ -5,7 +5,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
 const App = () => {
-  const [transactions, setTransactions] = useState({ data: [{ id: 1, date: '2024-05-07', amount: 1000000, type: 'credit', description: 'ok' }], totalPages: 1 });
+  const [transactions, setTransactions] = useState({});
   const [total, setTotal] = useState(0);
   const [date, setDate] = useState('');
   const [type, setType] = useState('');
@@ -96,7 +96,7 @@ const App = () => {
     <div>
       <div className='mb-3'>
         <label htmlFor="date" className="form-label">Tanggal Transaksi</label>
-        <input className="form-control" id="date" name="date" type="date" value={moment(date).format('YYYY-MM-DD')} onChange={e => setDate(e.target.value)} placeholder="Tanggal" />
+        <input className="form-control" id="date" name="date" type="date" value={date} onChange={e => setDate(e.target.value)} placeholder="Tanggal" />
       </div>
       <div className='mb-3'>
         <label htmlFor="type" className="form-label">Pilih Jenis Transaksi</label>
@@ -144,11 +144,11 @@ const App = () => {
     <div className='row'>
       <div className='mb-3 col-12 col-lg-3 col-md-6'>
         <label htmlFor="filter-date-from" className="form-label">Dari Tanggal</label>
-        <input className="form-control" id="filter-date-from" name="filter-date-from" type="date" value={filterDateFrom} max={filterDateTo ? moment(filterDateTo).format('YYYY-MM-DD') : null} onChange={e => setFilterDateFrom(e.target.value)} placeholder="Dari Tanggal" />
+        <input className="form-control" id="filter-date-from" name="filter-date-from" type="date" value={filterDateFrom} max={filterDateTo} onChange={e => setFilterDateFrom(e.target.value)} placeholder="Dari Tanggal" />
       </div>
       <div className='mb-3 col-12 col-lg-3 col-md-6'>
         <label htmlFor="filter-date-to" className="form-label">Sampai Tanggal</label>
-        <input className="form-control" id="filter-date-to" name="filter-date-to" type="date" value={filterDateTo} min={filterDateFrom ? moment(filterDateFrom).format('YYYY-MM-DD') : null} onChange={e => setFilterDateTo(e.target.value)} placeholder="Sampai Tanggal" />
+        <input className="form-control" id="filter-date-to" name="filter-date-to" type="date" value={filterDateTo} min={filterDateFrom} onChange={e => setFilterDateTo(e.target.value)} placeholder="Sampai Tanggal" />
       </div>
       <div className='mb-3 col-12 col-lg-3 col-md-6'>
         <label htmlFor="filter-type" className="form-label">Pilih Jenis Transaksi</label>
@@ -216,7 +216,7 @@ const App = () => {
 
   const handleEdit = ({ id, ...data }) => {
     setId(id)
-    setDate(data.date);
+    setDate(moment(data.date).format('YYYY-MM-DD'));
     setType(data.type);
     setAmount(data.amount);
     setDescription(data.description);
