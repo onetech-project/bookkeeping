@@ -218,7 +218,7 @@ const App = () => {
     setId(id)
     setDate(moment(data.date).format('YYYY-MM-DD'));
     setType(data.type);
-    setAmount(data.amount);
+    setAmount(Math.trunc(data.amount));
     setDescription(data.description);
     setShow({ show: true, type: 'edit' });
   }
