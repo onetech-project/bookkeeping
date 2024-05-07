@@ -35,7 +35,7 @@ const App = () => {
       .then(res => {
         setTotal(res.data.total);
       })
-      // .catch(error => alert(JSON.stringify(error.response.data)));
+      .catch(error => console.log(error.response.data));
   }, [transactions])
 
   const handleSubmit = () => {
@@ -52,7 +52,7 @@ const App = () => {
         if (error.response.status === 403) {
           localStorage.removeItem('token');
         }
-        alert(JSON.stringify(error.response.data));
+        console.log(error.response.data);
       });
   };
 
@@ -67,7 +67,7 @@ const App = () => {
       .then(res => {
         setTransactions(res.data);
       })
-      // .catch(error => alert(JSON.stringify(error.response.data)));
+      .catch(error => console.log(error.response.data));
   };
 
   const handleReset = () => {
@@ -182,7 +182,7 @@ const App = () => {
         setUsername();
         setPassword();
       })
-      .catch(error => alert(JSON.stringify(error.response.data)));
+      .catch(error => console.log(error.response.data));
   }
 
   return (

@@ -59,9 +59,9 @@ app.get('/transactions', (req, res) => {
 
   if (where.length > 0) queryString += ` WHERE ${where.join('AND')}`;
   
+  queryString += ` ORDER BY date DESC`;
   queryString += ` LIMIT ${size}`;
   queryString += ` OFFSET ${(page - 1) * size}`;
-  queryString += ` ORDER BY date DESC`;
   
   connection.query(queryString, (error, results) => {
     if (error) return res.status(500).send(`${error.code}: ${error.message}`);
