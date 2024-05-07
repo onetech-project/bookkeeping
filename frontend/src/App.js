@@ -100,9 +100,9 @@ const App = () => {
       </div>
       <div className='mb-3'>
         <label htmlFor="type" className="form-label">Pilih Jenis Transaksi</label>
-        <select defaultValue={""} className='form-select' name="type" id="type" value={type} onChange={e => setType(e.target.value)}>
+        <select className='form-select' name="type" id="type" value={type} onChange={e => setType(e.target.value)}>
           {Object.keys(typeObj).map(x => (
-            <option value={x} disabled={x === ""}>{typeObj[x]}</option>
+            <option key={x} value={x} disabled={x === ""}>{typeObj[x]}</option>
           ))}
         </select>
       </div>
@@ -152,14 +152,14 @@ const App = () => {
       </div>
       <div className='mb-3 col-12 col-lg-3 col-md-6'>
         <label htmlFor="filter-type" className="form-label">Pilih Jenis Transaksi</label>
-        <select defaultValue={""} className='form-select' name="filter-type" id="filter-type" value={filterType} onChange={e => setFilterType(e.target.value)}>
+        <select className='form-select' name="filter-type" id="filter-type" value={filterType} onChange={e => setFilterType(e.target.value)}>
           {Object.keys(typeObj).map(x => (
-            <option value={x} disabled={x === ""}>{typeObj[x]}</option>
+            <option key={x} value={x} disabled={x === ""}>{typeObj[x]}</option>
           ))}
         </select>
       </div>
       <div className='col-12 col-lg-3 col-md-6 d-flex flex-row align-content-center justify-content-start flex-wrap gap-2'>
-        <button type='button' className='btn btn-primary' onClick={handleSearch} placeholder='search'><i class="bi bi-search"></i> Cari</button>
+        <button type='button' className='btn btn-primary' onClick={handleSearch} placeholder='search'><i className="bi bi-search"></i> Cari</button>
         <button type='button' className='btn btn-secondary' onClick={handleReset} placeholder='search'>Reset</button>
       </div>
     </div>
@@ -261,10 +261,10 @@ const App = () => {
                   <th scope='col'>Tipe</th>
                   <th scope='col'>Jumlah</th>
                   <th scope='col'>Deskripsi</th>
-                  <th scope='col'></th>
+                  {localStorage.getItem('token') && <th scope='col'></th>}
                 </tr>
               </thead>
-              <tbody class="table-group-divider">
+              <tbody className="table-group-divider">
                 {transactions.data?.map((x,i) => (
                   <tr key={x.id}>
                     <th scope='row'>{(i + ((page - 1) * size)) + 1}</th>
@@ -272,12 +272,14 @@ const App = () => {
                     <td>{typeObj[x.type]}</td>
                     <td>{currencyFormatter.format(x.amount)}</td>
                     <td>{x.description}</td>
-                    <td>
-                      <div className='btn-group'>
-                        <button type='button' className='btn btn-sm btn-primary' onClick={() => handleEdit(x)}><i class="bi bi-pencil"></i></button>
-                        <button type='button' className='btn btn-sm btn-danger' onClick={() => handleDelete(x)}><i class="bi bi-trash"></i></button>
-                      </div>
-                    </td>
+                    {localStorage.getItem('token') && (
+                      <td>
+                        <div className='btn-group'>
+                          <button type='button' className='btn btn-sm btn-primary' onClick={() => handleEdit(x)}><i className="bi bi-pencil"></i></button>
+                          <button type='button' className='btn btn-sm btn-danger' onClick={() => handleDelete(x)}><i className="bi bi-trash"></i></button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -285,16 +287,16 @@ const App = () => {
           </div>
           <nav aria-label="Page navigation example">
             <ul className="pagination justify-content-end">
-              <select defaultValue={""} className='me-2' name="size" id="size" value={size} onChange={e => setSize(e.target.value)}>
+              <select className='me-2' name="size" id="size" value={size} onChange={e => setSize(e.target.value)}>
                 {[...Array(5)].map((x, i) => (
-                  <option value={(i+1) * 5}>{(i+1) * 5}</option>
+                  <option key={i.toString()} value={(i+1) * 5}>{(i+1) * 5}</option>
                 ))}
               </select>
               <li className={`page-item ${page === 1 ? 'disabled': ''}`}>
                 <a className="page-link" onClick={() => setPage(page - 1)}>Previous</a>
               </li>
               {[...Array(transactions.totalPages)].map((x, i) => (
-                <li className="page-item"><a className={`page-link ${(i+1) === page ? 'active': ''}`} onClick={() => setPage(i+1)}>{i+1}</a></li>
+                <li key={i.toString()} className="page-item"><a className={`page-link ${(i+1) === page ? 'active': ''}`} onClick={() => setPage(i+1)}>{i+1}</a></li>
               ))}
               <li className={`page-item ${page === transactions.totalPages ? 'disabled': ''}`}>
                 <a className="page-link" onClick={() => setPage(page + 1)}>Next</a>

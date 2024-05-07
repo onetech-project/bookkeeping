@@ -1,0 +1,31 @@
+{
+  "name": "DARBUKA",
+  "short_name": "DARBUKA",
+  "description": "DARBUKA",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "logo196.png",
+      "type": "image/png",
+      "sizes": "196x196"
+    },
+    {
+      "src": "logo180.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

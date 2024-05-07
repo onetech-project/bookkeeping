@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 /*We are basically telling webpack to take index.js from entry. Then check for all file extensions in resolve. 
 After that apply all the rules in module.rules and produce the output and place it in main.js in the public folder.*/
@@ -39,6 +40,7 @@ module.exports={
         */
         static: {
           directory: path.join(__dirname, 'dist'),
+          directory: path.join(__dirname, 'public'),
         },
         /** "open" 
          * opens the browser after server is successfully started
@@ -66,6 +68,17 @@ module.exports={
     plugins: [
       new HtmlWebpackPlugin({
         template: './public/index.html',
+        favicon: "./public/favicon.png",
+      }),
+      new CopyPlugin({
+        patterns: [
+          { 
+            from: 'public',
+            globOptions: {
+              ignore: ["**/index.html"]
+            }
+          },
+        ],
       }),
     ],
     module:{
