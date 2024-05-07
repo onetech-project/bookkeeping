@@ -12,6 +12,7 @@ const App = () => {
   const [amount, setAmount] = useState();
   const [description, setDescription] = useState('');
   const [show, setShow] = useState('');
+  const [showLogin, setShowLogin] = useState('');
   const typeObj = {
     "": "",
     debit: 'Pengeluaran',
@@ -22,6 +23,8 @@ const App = () => {
   const [filterType, setFilterType] = useState('');
   const [size, setSize] = useState(10);
   const [page, setPage] = useState(1);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     handleSearch()
@@ -32,7 +35,7 @@ const App = () => {
       .then(res => {
         setTotal(res.data.total);
       })
-      .catch(error => alert(JSON.stringify(error.response.data)));
+      // .catch(error => alert(JSON.stringify(error.response.data)));
   }, [transactions])
 
   const handleSubmit = () => {
@@ -45,7 +48,12 @@ const App = () => {
         setType('');
         setShow(false);
       })
-      .catch(error => alert(JSON.stringify(error.response.data)));
+      .catch(error => {
+        if (error.response.status === 403) {
+          localStorage.removeItem('token');
+        }
+        alert(JSON.stringify(error.response.data));
+      });
   };
 
   const handleSearch = () => {
@@ -59,7 +67,7 @@ const App = () => {
       .then(res => {
         setTransactions(res.data);
       })
-      .catch(error => alert(JSON.stringify(error.response.data)));
+      // .catch(error => alert(JSON.stringify(error.response.data)));
   };
 
   const handleReset = () => {
@@ -135,17 +143,67 @@ const App = () => {
         </select>
       </div>
       <div className='col-12 col-lg-3 col-md-6 d-flex flex-row align-content-center justify-content-start flex-wrap gap-2'>
-        <button type='button' className='btn btn-primary' onClick={handleSearch} placeholder='search'>Cari</button>
+        <button type='button' className='btn btn-primary' onClick={handleSearch} placeholder='search'><i class="bi bi-search"></i> Cari</button>
         <button type='button' className='btn btn-secondary' onClick={handleReset} placeholder='search'>Reset</button>
       </div>
     </div>
   )
 
+  const ModalLogin = () => (
+    <Modal show={showLogin} onHide={() => setShowLogin(false)}>
+      <Modal.Header closeButton>
+        <Modal.Title>Login</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div>
+          <div className='mb-3'>
+            <label htmlFor="username" className="form-label">Username</label>
+            <input id="username" name="username" className="form-control" type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Username" />
+          </div>
+          <div className='mb-3'>
+            <label htmlFor="password" className="form-label">Password</label>
+            <input type="password" id="password" name="password" className="form-control" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
+          </div>
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleLogin}>
+          Login
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  )
+
+  const handleLogin = () => {
+    axios.post('/auth/login', { username, password })
+      .then(res => {
+        localStorage.setItem('token', res.data.token);
+        setShowLogin(false);
+        setUsername();
+        setPassword();
+      })
+      .catch(error => alert(JSON.stringify(error.response.data)));
+  }
+
   return (
     <>
       {ModalForm()}
+      {ModalLogin()}
       <div className='container'>
-        <h1>Pembukuan</h1>
+        <div className='row my-2'>
+          <div className='col-6 align-content-center'><h1 className='col-6'>DARBUKA</h1></div>
+          {!localStorage.getItem('token') && (
+            <div className='col-6 align-content-center'>
+              <button
+                type="button"
+                onClick={() => setShowLogin(true)}
+                className='btn btn-danger float-end'
+              >
+                Login
+              </button>
+            </div>
+          )}
+        </div>
         <FilterForm />
         <div>
           <div className='row my-2'>

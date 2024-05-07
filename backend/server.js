@@ -122,4 +122,17 @@ app.post('/auth/login', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  setTimeout(function () {
+    process.send('ready');
+  }, 1000);
 });
+
+function cleanupAndExit() {
+  server.close(() => {
+    console.log('bookkeeping server closed');
+    process.exit(0);
+  });
+}
+
+process.on('SIGTERM', cleanupAndExit);
+process.on('SIGINT', cleanupAndExit);
