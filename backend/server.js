@@ -74,7 +74,7 @@ app.get('/transactions', (req, res) => {
 
 app.get('/transactions/total', (req, res) => {
   const query = `
-  SELECT (a.total_credit - b.total_debit) AS total 
+  SELECT (coalesce(a.total_credit, 0) - coalesce(b.total_debit,0)) AS total 
   FROM (SELECT SUM(amount) AS total_credit FROM transactions WHERE type = 'credit') a
   JOIN (SELECT SUM(amount) AS total_debit FROM transactions WHERE type = 'debit') b
   `
@@ -92,6 +92,26 @@ app.post('/transactions', authenticateToken, validateTodoInput, (req, res) => {
       if (e2) return res.status(500).send(`${e2.code}: ${e2.message}`);
       return res.send(r2[0]);
     })
+  });
+});
+
+app.put('/transactions/:id', authenticateToken, validateTodoInput, (req, res) => {
+  const { type, amount, date, description } = req.body;
+  const { id } = req.params;
+  connection.query('UPDATE transactions SET date = ?, type = ?, amount = ?, description = ? WHERE id = ?', [date, type, amount, description, id], (error, results) => {
+    if (error) return res.status(500).send(`${error.code}: ${error.message}`);
+    connection.query('SELECT * FROM transactions WHERE id = ?', [id], (e2, r2) => {
+      if (e2) return res.status(500).send(`${e2.code}: ${e2.message}`);
+      return res.send(r2[0]);
+    })
+  });
+});
+
+app.delete('/transactions/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  connection.query('DELETE FROM transactions WHERE id = ?', [id], (error, results) => {
+    if (error) return res.status(500).send(`${error.code}: ${error.message}`);
+    return res.send(results);
   });
 });
 

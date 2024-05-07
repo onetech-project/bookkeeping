@@ -5,13 +5,14 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
 const App = () => {
-  const [transactions, setTransactions] = useState({});
+  const [transactions, setTransactions] = useState({ data: [{ id: 1, date: '2024-05-07', amount: 1000000, type: 'credit', description: 'ok' }], totalPages: 1 });
   const [total, setTotal] = useState(0);
   const [date, setDate] = useState('');
   const [type, setType] = useState('');
   const [amount, setAmount] = useState();
   const [description, setDescription] = useState('');
-  const [show, setShow] = useState('');
+  const [id, setId] = useState();
+  const [show, setShow] = useState({ show: false, type: 'add' });
   const [showLogin, setShowLogin] = useState('');
   const typeObj = {
     "": "",
@@ -38,15 +39,24 @@ const App = () => {
       .catch(error => console.log(error.response.data));
   }, [transactions])
 
+  const resetForm = () => {
+    setId('');
+    setDate('');
+    setType('');
+    setAmount();
+    setDescription('');
+  }
+
   const handleSubmit = () => {
-    axios.post('/transactions', { date, type, amount, description }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    const method = show.type === 'add' ? 'post' : 'put';
+    const body = { date, type, amount, description };
+    const options = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+    const url = show.type === 'add' ? '/transactions' : `/transactions${id}`;
+    axios[method](url, body, options)
       .then(() => {
         handleSearch();
-        setDate('');
-        setAmount(0);
-        setDescription(0);
-        setType('');
-        setShow(false);
+        resetForm();
+        setShow({ show: false });
       })
       .catch(error => {
         if (error.response.status === 403) {
@@ -86,7 +96,7 @@ const App = () => {
     <div>
       <div className='mb-3'>
         <label htmlFor="date" className="form-label">Tanggal Transaksi</label>
-        <input className="form-control" id="date" name="date" type="date" value={date} onChange={e => setDate(e.target.value)} placeholder="Tanggal" />
+        <input className="form-control" id="date" name="date" type="date" value={moment(date).format('YYYY-MM-DD')} onChange={e => setDate(e.target.value)} placeholder="Tanggal" />
       </div>
       <div className='mb-3'>
         <label htmlFor="type" className="form-label">Pilih Jenis Transaksi</label>
@@ -108,13 +118,19 @@ const App = () => {
   )
   
   const ModalForm = () => (
-    <Modal show={show} onHide={() => setShow(false)}>
+    <Modal 
+      show={show.show} 
+      onHide={() => {
+        setShow({ show: false });
+        resetForm();
+      }}
+    >
       <Modal.Header closeButton>
-        <Modal.Title>Tambah Transaksi</Modal.Title>
+        <Modal.Title>{show.type === 'add' ? 'Tambah' : 'Ubah'} Transaksi</Modal.Title>
       </Modal.Header>
       <Modal.Body>{Form()}</Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShow(false)}>
+        <Button variant="secondary" onClick={() => setShow({ show: false })}>
           Batal
         </Button>
         <Button variant="primary" onClick={handleSubmit}>
@@ -128,11 +144,11 @@ const App = () => {
     <div className='row'>
       <div className='mb-3 col-12 col-lg-3 col-md-6'>
         <label htmlFor="filter-date-from" className="form-label">Dari Tanggal</label>
-        <input className="form-control" id="filter-date-from" name="filter-date-from" type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} placeholder="Dari Tanggal" />
+        <input className="form-control" id="filter-date-from" name="filter-date-from" type="date" value={filterDateFrom} max={filterDateTo ? moment(filterDateTo).format('YYYY-MM-DD') : null} onChange={e => setFilterDateFrom(e.target.value)} placeholder="Dari Tanggal" />
       </div>
       <div className='mb-3 col-12 col-lg-3 col-md-6'>
         <label htmlFor="filter-date-to" className="form-label">Sampai Tanggal</label>
-        <input className="form-control" id="filter-date-to" name="filter-date-to" type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} placeholder="Sampai Tanggal" />
+        <input className="form-control" id="filter-date-to" name="filter-date-to" type="date" value={filterDateTo} min={filterDateFrom ? moment(filterDateFrom).format('YYYY-MM-DD') : null} onChange={e => setFilterDateTo(e.target.value)} placeholder="Sampai Tanggal" />
       </div>
       <div className='mb-3 col-12 col-lg-3 col-md-6'>
         <label htmlFor="filter-type" className="form-label">Pilih Jenis Transaksi</label>
@@ -150,7 +166,14 @@ const App = () => {
   )
 
   const ModalLogin = () => (
-    <Modal show={showLogin} onHide={() => setShowLogin(false)}>
+    <Modal 
+      show={showLogin} 
+      onHide={() => {
+        setShowLogin(false);
+        setUsername('');
+        setPassword('');
+      }}
+    >
       <Modal.Header closeButton>
         <Modal.Title>Login</Modal.Title>
       </Modal.Header>
@@ -179,10 +202,25 @@ const App = () => {
       .then(res => {
         localStorage.setItem('token', res.data.token);
         setShowLogin(false);
-        setUsername();
-        setPassword();
+        setUsername('');
+        setPassword('');
       })
       .catch(error => console.log(error.response.data));
+  }
+
+  const handleDelete = (data) => {
+    axios.delete(`/transactions/${data.id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+      .then(handleSearch)
+      .catch(error => console.log(error.response.data))
+  }
+
+  const handleEdit = ({ id, ...data }) => {
+    setId(id)
+    setDate(data.date);
+    setType(data.type);
+    setAmount(data.amount);
+    setDescription(data.description);
+    setShow({ show: true, type: 'edit' });
   }
 
   return (
@@ -210,7 +248,7 @@ const App = () => {
             <p className='col-10 col-md-6 col-lg-6'>total dana: <strong>{currencyFormatter.format(total)}</strong></p>
             {localStorage.getItem('token') && (
               <div className='col-2 col-md-6 col-lg-6'>
-                <button type="button" onClick={() => setShow(true)} className='btn btn-danger float-end'>+<span className='d-none d-md-inline d-lg-inline'> Tambah Transaksi</span></button>
+                <button type="button" onClick={() => setShow({ show: true, type: 'add' })} className='btn btn-danger float-end'>+<span className='d-none d-md-inline d-lg-inline'> Tambah Transaksi</span></button>
               </div>
             )}
           </div>
@@ -223,6 +261,7 @@ const App = () => {
                   <th scope='col'>Tipe</th>
                   <th scope='col'>Jumlah</th>
                   <th scope='col'>Deskripsi</th>
+                  <th scope='col'></th>
                 </tr>
               </thead>
               <tbody class="table-group-divider">
@@ -233,6 +272,12 @@ const App = () => {
                     <td>{typeObj[x.type]}</td>
                     <td>{currencyFormatter.format(x.amount)}</td>
                     <td>{x.description}</td>
+                    <td>
+                      <div className='btn-group'>
+                        <button type='button' className='btn btn-sm btn-primary' onClick={() => handleEdit(x)}><i class="bi bi-pencil"></i></button>
+                        <button type='button' className='btn btn-sm btn-danger' onClick={() => handleDelete(x)}><i class="bi bi-trash"></i></button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
