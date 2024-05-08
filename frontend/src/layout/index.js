@@ -107,7 +107,7 @@ const Footer = () => {
       <div className="text-center">
         <br />© {new Date().getFullYear()} All Right Reserved.&nbsp;
         <a className="text-reset text-decoration-none" href="/">
-          Darbaku
+          Darbuka
         </a>
       </div>
     </nav>
