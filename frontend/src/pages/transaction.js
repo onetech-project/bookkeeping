@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { useParams } from 'react-router-dom'
 import { categories } from '../utils';
+import { LoggedInContext } from '../navigation';
 
 const App = () => {
   const [transactions, setTransactions] = useState({});
@@ -24,6 +25,7 @@ const App = () => {
   const [size, setSize] = useState(10);
   const [page, setPage] = useState(1);
   const { category } = useParams();
+  const { loggedIn } = useContext(LoggedInContext);
 
   useEffect(() => {
     handleSearch()
@@ -53,7 +55,7 @@ const App = () => {
 
     const method = show.type === 'add' ? 'post' : 'put';
     const body = { date, category, type, amount, description };
-    const options = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+    const options = { headers: { Authorization: `Bearer ${loggedIn}` } };
     const url = show.type === 'add' ? '/transactions' : `/transactions/${id}`;
     axios[method](url, body, options)
       .then(() => {
@@ -163,7 +165,7 @@ const App = () => {
           onChange={e => setFilterMonth(e.target.value)}
         />
       </div>
-      {localStorage.getItem('token') && (
+      {loggedIn && (
         <div className='col-2 col-md-6 col-lg-9'>
           <button type="button" onClick={() => setShow({ show: true, type: 'add' })} className='btn btn-danger float-end'>+<span className='d-none d-md-inline d-lg-inline'> Tambah Transaksi</span></button>
         </div>
@@ -172,7 +174,7 @@ const App = () => {
   )
 
   const handleDelete = (data) => {
-    axios.delete(`/transactions/${data.id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    axios.delete(`/transactions/${data.id}`, { headers: { Authorization: `Bearer ${loggedIn}` } })
       .then(handleSearch)
       .catch(error => console.log(error.response.data))
   }
@@ -207,7 +209,7 @@ const App = () => {
                   <th scope='col'>Tipe</th>
                   <th scope='col'>Jumlah</th>
                   <th scope='col'>Deskripsi</th>
-                  {localStorage.getItem('token') && <th scope='col'></th>}
+                  {loggedIn && <th scope='col'></th>}
                 </tr>
               </thead>
               <tbody className="table-group-divider">
@@ -218,7 +220,7 @@ const App = () => {
                     <td>{typeObj[x.type]}</td>
                     <td>{currencyFormatter.format(x.amount)}</td>
                     <td>{x.description}</td>
-                    {localStorage.getItem('token') && (
+                    {loggedIn && (
                       <td>
                         <div className='btn-group'>
                           <button type='button' className='btn btn-sm btn-primary' onClick={() => handleEdit(x)}><i className="bi bi-pencil"></i></button>

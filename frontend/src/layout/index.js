@@ -1,16 +1,18 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState, useContext } from 'react';
 import { logoBlackNoBgPng } from '../assets/images';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
 import { categories } from '../utils';
+import { LoggedInContext } from '../navigation';
+
 
 const NavBar = () => {
   const [showLogin, setShowLogin] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [, forceUpdate] = useReducer(x => !x);
+  const { loggedIn, setLoggedIn } = useContext(LoggedInContext);
 
   const ModalLogin = () => (
     <Modal 
@@ -51,13 +53,14 @@ const NavBar = () => {
         setShowLogin(false);
         setUsername('');
         setPassword('');
+        setLoggedIn(true);
       })
       .catch(error => console.log(error.response.data));
   }
 
   const handleLogout = () => {
     localStorage.clear();
-    forceUpdate();
+    setLoggedIn(false);
   }
 
   return (
@@ -82,13 +85,13 @@ const NavBar = () => {
             <form className="d-flex" role="search">
               <button
                 type="button"
-                className={`btn ${localStorage.getItem('token') ? 'btn-outline-secondary' : 'btn-outline-danger'}`}
+                className={`btn ${loggedIn ? 'btn-outline-secondary' : 'btn-outline-danger'}`}
                 onClick={() => {
-                  if (localStorage.getItem('token')) return handleLogout();
+                  if (loggedIn) return handleLogout();
                   return setShowLogin(true);
                 }}
               >
-                {localStorage.getItem('token') ? 'Logout' : 'Login'}
+                {loggedIn ? 'Logout' : 'Login'}
               </button>
             </form>
           </div>
