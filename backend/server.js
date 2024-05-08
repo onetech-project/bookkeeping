@@ -37,7 +37,7 @@ connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_DATABASE}`, (er
         console.log('Admin account created');
       });
     })
-    connection.query(`CREATE TABLE IF NOT EXISTS transactions (id INT AUTO_INCREMENT PRIMARY KEY, date DATE NOT NULL, type VARCHAR(255) NOT NULL, amount DECIMAL(20,2) NOT NULL, description VARCHAR(255))`, (e2, r2) => {
+    connection.query(`CREATE TABLE IF NOT EXISTS transactions (id INT AUTO_INCREMENT PRIMARY KEY, date DATE NOT NULL, category VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, amount DECIMAL(20,2) NOT NULL, description VARCHAR(255))`, (e2, r2) => {
       if (e2) throw e2;
       console.log('Table transactions created');
     })
@@ -51,10 +51,11 @@ app.get('/transactions', (req, res) => {
   let queryString = 'SELECT * FROM transactions';
   const where = [];
   
-  if (payload.type) where.push(`type='${payload.type}'`)
+  if (payload.type) where.push(`type='${payload.type}'`);
+  if (payload.category) where.push(`category='${payload.category}'`);
   if (payload.date) {
-    const date = payload.date.split('|')
-    where.push(`date BETWEEN '${date[0]}' AND '${date[1]}'`)
+    const date = payload.date.split('|');
+    where.push(` date BETWEEN '${date[0]}' AND '${date[1]}'`);
   }
 
   if (where.length > 0) queryString += ` WHERE ${where.join('AND')}`;
@@ -73,10 +74,11 @@ app.get('/transactions', (req, res) => {
 });
 
 app.get('/transactions/total', (req, res) => {
+  const { category } = req.query;
   const query = `
   SELECT (coalesce(a.total_credit, 0) - coalesce(b.total_debit,0)) AS total 
-  FROM (SELECT SUM(amount) AS total_credit FROM transactions WHERE type = 'credit') a
-  JOIN (SELECT SUM(amount) AS total_debit FROM transactions WHERE type = 'debit') b
+  FROM (SELECT SUM(amount) AS total_credit FROM transactions WHERE type = 'credit' AND category='${category}') a
+  JOIN (SELECT SUM(amount) AS total_debit FROM transactions WHERE type = 'debit' AND category='${category}') b
   `
   connection.query(query, (error, results) => {
     if (error) return res.status(500).send(`${error.code}: ${error.message}`);
@@ -85,8 +87,8 @@ app.get('/transactions/total', (req, res) => {
 });
 
 app.post('/transactions', authenticateToken, validateTodoInput, (req, res) => {
-  const { type, amount, date, description } = req.body;
-  connection.query('INSERT INTO transactions (date, type, amount, description) VALUES (?, ?, ?, ?)', [date, type, amount, description], (error, results) => {
+  const { date, category, type, amount, description } = req.body;
+  connection.query('INSERT INTO transactions (date, category, type, amount, description) VALUES (?, ?, ?, ?, ?)', [date, category, type, amount, description], (error, results) => {
     if (error) return res.status(500).send(`${error.code}: ${error.message}`);
     connection.query('SELECT * FROM transactions WHERE id = ?', [results.insertId], (e2, r2) => {
       if (e2) return res.status(500).send(`${e2.code}: ${e2.message}`);
@@ -96,9 +98,9 @@ app.post('/transactions', authenticateToken, validateTodoInput, (req, res) => {
 });
 
 app.put('/transactions/:id', authenticateToken, validateTodoInput, (req, res) => {
-  const { type, amount, date, description } = req.body;
+  const { date, category, type, amount, description } = req.body;
   const { id } = req.params;
-  connection.query('UPDATE transactions SET date = ?, type = ?, amount = ?, description = ? WHERE id = ?', [date, type, amount, description, id], (error, results) => {
+  connection.query('UPDATE transactions SET date = ?, category = ?, type = ?, amount = ?, description = ? WHERE id = ?', [date, category, type, amount, description, id], (error, results) => {
     if (error) return res.status(500).send(`${error.code}: ${error.message}`);
     connection.query('SELECT * FROM transactions WHERE id = ?', [id], (e2, r2) => {
       if (e2) return res.status(500).send(`${e2.code}: ${e2.message}`);
@@ -140,6 +142,12 @@ app.post('/auth/login', (req, res) => {
     });
   })
 });
+
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist/index.html'), (err) => {
+    if (err) res.status(500).send(err);
+  })
+})
 
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
