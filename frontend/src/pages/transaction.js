@@ -25,7 +25,7 @@ const App = () => {
   const [size, setSize] = useState(10);
   const [page, setPage] = useState(1);
   const { category } = useParams();
-  const { loggedIn } = useContext(LoggedInContext);
+  const { loggedIn, setLoggedIn } = useContext(LoggedInContext);
 
   useEffect(() => {
     handleSearch()
@@ -55,7 +55,7 @@ const App = () => {
 
     const method = show.type === 'add' ? 'post' : 'put';
     const body = { date, category, type, amount, description };
-    const options = { headers: { Authorization: `Bearer ${loggedIn}` } };
+    const options = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
     const url = show.type === 'add' ? '/transactions' : `/transactions/${id}`;
     axios[method](url, body, options)
       .then(() => {
@@ -66,6 +66,7 @@ const App = () => {
       .catch(error => {
         if (error.response.status === 403) {
           localStorage.removeItem('token');
+          setLoggedIn(false);
         }
         console.log(error.response.data);
       });
@@ -174,9 +175,15 @@ const App = () => {
   )
 
   const handleDelete = (data) => {
-    axios.delete(`/transactions/${data.id}`, { headers: { Authorization: `Bearer ${loggedIn}` } })
+    axios.delete(`/transactions/${data.id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       .then(handleSearch)
-      .catch(error => console.log(error.response.data))
+      .catch(error => {
+        if (error.response.status === 403) {
+          localStorage.removeItem('token');
+          setLoggedIn(false);
+        }
+        console.log(error.response.data);
+      });
   }
 
   const handleEdit = ({ id, ...data }) => {
