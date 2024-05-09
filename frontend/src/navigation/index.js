@@ -1,6 +1,6 @@
 import React, { Suspense, createContext, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Loader } from '../components';
+import { Loader, Toast } from '../components';
 import { NavBar, Footer } from '../layout';
 import pages from './pages';
 import PageNotFound from '../pages/notfound';
@@ -17,7 +17,7 @@ const Navigation = () => {
       <Suspense fallback={<Loader />}>
         <LoggedInContext.Provider value={{ loggedIn, setLoggedIn }}>
           <NavBar />
-            <div style={{ height: '80.5vh' }}>
+            <div className='main-content'>
               <Routes>
                 {pages.map((x) => (
                   <Route key={x.path} path={x.path} element={x.element} />
@@ -26,6 +26,7 @@ const Navigation = () => {
               </Routes>
             </div>
           <Footer />
+          <Toast />
         </LoggedInContext.Provider>
       </Suspense>
     </Router>

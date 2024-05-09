@@ -6,6 +6,7 @@ import Button from 'react-bootstrap/Button';
 import { useParams } from 'react-router-dom'
 import { categories } from '../utils';
 import { LoggedInContext } from '../navigation';
+import { showToast } from '../components/toast';
 
 const App = () => {
   const [transactions, setTransactions] = useState({});
@@ -36,7 +37,10 @@ const App = () => {
       .then(res => {
         setTotal(res.data.total);
       })
-      .catch(error => console.log(error.response.data));
+      .catch(error => {
+        console.log(error.response.data)
+        showToast('error', JSON.stringify(error.response.data));
+      });
   }, [transactions])
 
   const resetForm = () => {
@@ -62,6 +66,7 @@ const App = () => {
         handleSearch();
         resetForm();
         setShow({ show: false });
+        showToast('success', `Berhasil ${show.type === 'add' ? 'menambahkan' : 'memperbarui'} transaksi.`);
       })
       .catch(error => {
         if (error.response.status === 403) {
@@ -69,6 +74,17 @@ const App = () => {
           setLoggedIn(false);
         }
         console.log(error.response.data);
+        let message = error.response.data;
+        if (error.response.data?.message) {
+          message = (
+            <ul>
+              {error.response.data?.message.map(x => (
+                <li>{x}</li>
+              ))}
+            </ul>
+          )
+        }
+        showToast('error', message);
       });
   };
 
@@ -85,7 +101,10 @@ const App = () => {
       .then(res => {
         setTransactions(res.data);
       })
-      .catch(error => console.log(error.response.data));
+      .catch(error => {
+        console.log(error.response.data)
+        showToast('error', JSON.stringify(error.response.data));
+      });
   };
 
   const currencyFormatter = Intl.NumberFormat("id-ID", {
@@ -176,13 +195,16 @@ const App = () => {
 
   const handleDelete = (data) => {
     axios.delete(`/transactions/${data.id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
-      .then(handleSearch)
-      .catch(error => {
+      .then(() => {
+        handleSearch();
+        showToast('success', 'Data berhasil dihapus!');
+      }).catch(error => {
         if (error.response.status === 403) {
           localStorage.removeItem('token');
           setLoggedIn(false);
         }
         console.log(error.response.data);
+        showToast('error', JSON.stringify(error.response.data));
       });
   }
 
@@ -198,8 +220,8 @@ const App = () => {
   return (
     <>
       {ModalForm()}
-      <div className='mx-3' data-aos="fade-right">
-        <div className='row my-4'>
+      <div className='mx-3 h-100' data-aos="fade-right">
+        <div className='row py-4'>
           <div className='align-content-center'><h3 className='text-capitalize'>{categories[category]}</h3></div>
         </div>
         <p className='col-10 col-md-6 col-lg-6'>Total Saldo Hingga {moment().format('MMMM')}: <strong>{currencyFormatter.format(total)}</strong></p>        
@@ -240,13 +262,13 @@ const App = () => {
               </tbody>
             </table>
           </div>
-          <nav aria-label="Page navigation example">
+          <nav aria-label="Page navigation example" className='d-flex flex-row justify-content-end align-items-start'>
+            <select className='me-2 form-control' style={{ width: '5rem' }} name="size" id="size" value={size} onChange={e => setSize(e.target.value)}>
+              {[...Array(5)].map((x, i) => (
+                <option key={i.toString()} value={(i+1) * 5}>{(i+1) * 5}</option>
+              ))}
+            </select>
             <ul className="pagination justify-content-end">
-              <select className='me-2' name="size" id="size" value={size} onChange={e => setSize(e.target.value)}>
-                {[...Array(5)].map((x, i) => (
-                  <option key={i.toString()} value={(i+1) * 5}>{(i+1) * 5}</option>
-                ))}
-              </select>
               <li className={`page-item ${page === 1 ? 'disabled': ''}`}>
                 <a className="page-link" onClick={() => setPage(page - 1)}>Previous</a>
               </li>
