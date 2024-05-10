@@ -105,11 +105,8 @@ module.exports={
               use: ['style-loader', 'css-loader', 'sass-loader'],
             },
             {
-              test: /\.(png|jpg|gif|svg)$/,
-              use: [{
-                  loader: 'file-loader',
-                  options: {}
-              }]
+              test: /\.(jpe?g|png|svg|gif|webp)$/,
+              type: 'asset/resource',
             }
         ]
     }

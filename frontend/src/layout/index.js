@@ -1,18 +1,18 @@
 import React, { useState, useContext } from 'react';
-import { logoColorNoBgSvg } from '../assets/images';
+import { logoBlackNoBgSvg, logoWhiteNoBgSvg } from '../assets/images';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
 import { categories } from '../utils';
-import { LoggedInContext } from '../navigation';
+import { AppContext } from '../navigation';
 import { showToast } from '../components/toast';
 
-const NavBar = () => {
+const NavBar = ({ color }) => {
   const [showLogin, setShowLogin] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { loggedIn, setLoggedIn } = useContext(LoggedInContext);
+  const { loggedIn, setLoggedIn } = useContext(AppContext);
 
   const ModalLogin = () => (
     <Modal 
@@ -81,26 +81,26 @@ const NavBar = () => {
   return (
     <>
       {ModalLogin()}
-      <nav className="navbar navbar-light navbar-expand-lg bg-body-darbuka-secondary shadow-sm">
+      <nav className={`main-header darbuka-toggler navbar-${color === 'dark' ? 'light' : 'dark'} navbar navbar-expand-sm shadow-sm`} data-aos="fade-right">
         <div className="container-fluid">
           <a className="navbar-brand" href="/">
-            <img src={logoColorNoBgSvg} height={50} width={150} />
+            <img src={color === 'dark' ? logoBlackNoBgSvg : logoWhiteNoBgSvg} height={50} width={150} />
           </a>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <button className="custom-toggler navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               {Object.keys(categories).map(x => (
                 <li className="nav-item" key={x}>
-                  <a className="text-primary nav-link active text-capitalize" aria-current="page" href={`/transaction/${x}`}>{categories[x]}</a>
+                  <a className={`${color === 'dark' ? 'text-black' : 'text-white'} fw-semibold nav-link active text-capitalize`} aria-current="page" href={`/transaction/${x}`}>{categories[x]}</a>
                 </li>
               ))}
             </ul>
             <form className="d-flex" role="search">
               <button
                 type="button"
-                className={`btn btn-outline-primary`}
+                className={`btn btn-outline-${color} btn-darbuka-login`}
                 onClick={() => {
                   if (loggedIn) return handleLogout();
                   return setShowLogin(true);
@@ -116,11 +116,11 @@ const NavBar = () => {
   )
 }
 
-const Footer = () => {
+const Footer = ({ color }) => {
   return (
-    <nav className="main-footer bg-body-darbuka-secondary">
+    <nav className="main-footer">
       <div className="d-flex flex-row align-items-center justify-content-center">
-        <span className='text-primary'>
+        <span className={`${color === 'dark' ? 'text-black' : 'text-white'} fw-semibold`}>
           <br />© {new Date().getFullYear()} All Right Reserved.&nbsp;
           <a className="text-reset text-decoration-none" href="/">
             Darbuka

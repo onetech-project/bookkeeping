@@ -5,29 +5,27 @@ import { NavBar, Footer } from '../layout';
 import pages from './pages';
 import PageNotFound from '../pages/notfound';
 
-export const LoggedInContext = createContext();
+export const AppContext = createContext();
 
 const Navigation = () => {
   const [loggedIn, setLoggedIn] = useState();
+  
   useEffect(() => {
     setLoggedIn(!!localStorage.getItem('token'));
   }, [])
+  
   return (
     <Router>
       <Suspense fallback={<Loader />}>
-        <LoggedInContext.Provider value={{ loggedIn, setLoggedIn }}>
-          <NavBar />
-            <div className='main-content'>
-              <Routes>
-                {pages.map((x) => (
-                  <Route key={x.path} path={x.path} element={x.element} />
-                ))}
-                <Route path="*" element={<PageNotFound />} />
-              </Routes>
-            </div>
-          <Footer />
+        <AppContext.Provider value={{ loggedIn, setLoggedIn }}>
+          <Routes>
+            {pages.map((x) => (
+              <Route key={x.path} path={x.path} element={x.element} />
+            ))}
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
           <Toast />
-        </LoggedInContext.Provider>
+        </AppContext.Provider>
       </Suspense>
     </Router>
   );

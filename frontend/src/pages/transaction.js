@@ -5,7 +5,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { useParams } from 'react-router-dom'
 import { categories } from '../utils';
-import { LoggedInContext } from '../navigation';
+import { AppContext } from '../navigation';
 import { showToast } from '../components/toast';
 
 const App = () => {
@@ -26,7 +26,7 @@ const App = () => {
   const [size, setSize] = useState(10);
   const [page, setPage] = useState(1);
   const { category } = useParams();
-  const { loggedIn, setLoggedIn } = useContext(LoggedInContext);
+  const { loggedIn, setLoggedIn } = useContext(AppContext);
 
   useEffect(() => {
     handleSearch()
@@ -175,9 +175,9 @@ const App = () => {
 
   const FilterForm = () => (
     <div className='row'>
-      <div className='mb-3 col-10 col-lg-3 col-md-6'>
+      <div className={`mb-3 ${loggedIn ? 'col-10' : 'col-12' }  col-lg-3 col-md-6`}>
         <input
-          className="form-control"
+          className="form-control shadow-sm"
           id="filter-date-from"
           name="filter-date-from"
           type="month"
@@ -220,16 +220,14 @@ const App = () => {
   return (
     <>
       {ModalForm()}
-      <div className='mx-3 h-100' data-aos="fade-right">
+      <div className='px-3 h-100' data-aos="fade-right">
         <div className='row py-4'>
           <div className='align-content-center'><h3 className='text-capitalize'>{categories[category]}</h3></div>
         </div>
-        <p className='col-10 col-md-6 col-lg-6'>Total Saldo Hingga {moment().format('MMMM')}: <strong>{currencyFormatter.format(total)}</strong></p>        
+        <p className='col-12 col-md-6 col-lg-6'>Total Saldo Hingga {moment().format('MMMM')}: <strong>{currencyFormatter.format(total)}</strong></p>        
         <div>
-          <div className='row my-2'>
-            <FilterForm />
-          </div>
-          <div className='table-responsive'>
+          <FilterForm />
+          <div className='table-responsive rounded rounded-top-3'>
             <table className='table table-striped table-hover'>
               <thead>
                 <tr>
@@ -242,6 +240,11 @@ const App = () => {
                 </tr>
               </thead>
               <tbody className="table-group-divider">
+                {!transactions.data?.length && (
+                  <tr>
+                    <td scope='row' colSpan={6} align='center'>NO DATA</td>
+                  </tr>
+                )}
                 {transactions.data?.map((x,i) => (
                   <tr key={x.id}>
                     <th scope='row'>{(i + ((page - 1) * size)) + 1}</th>
