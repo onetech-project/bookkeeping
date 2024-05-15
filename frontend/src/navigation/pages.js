@@ -16,7 +16,7 @@ const getElement = (element, color) => (
 const pages = [
   {
     path: '/',
-    element: <div className='bg-body-darbuka-quarternary'>{getElement(<Landing />, 'light')}</div>
+    element: <div className='bg-body-darbuka-quarternary'><div className='overlay'>{getElement(<Landing />, 'light')}</div></div>
   },
   {
     path: 'transaction/:category',

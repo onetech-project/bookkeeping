@@ -4,23 +4,23 @@ const bodyParser = require('body-parser');
 const db = require('./db');
 const authRoutes = require('./routes/auth');
 const transactionRoutes = require('./routes/transaction');
+const { handle404, handle500 } = require('./middlewares');
+const helmet = require('helmet');
 
 const app = express();
 const port = process.env.APP_PORT || 3000;
 
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'dist')));
-
 db.start();
 
+app.use(bodyParser.json());
+app.use(helmet());
+
+app.use(express.static(path.join(__dirname, 'dist')));
 app.use(authRoutes);
 app.use(transactionRoutes);
+app.use(handle404);
+app.use(handle500);
 
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'), (err) => {
-    if (err) res.status(500).send(err);
-  })
-})
 
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

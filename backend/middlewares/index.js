@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const path = require('path')
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -34,7 +35,20 @@ function validateTodoInput(req, res, next) {
   next();
 }
 
+function handle404(req, res, next) {
+  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'), (err) => {
+    if (err) res.status(500).send(err);
+  })
+}
+
+function handle500(err, req, res, next) {
+  console.error(err.stack)
+  res.status(500).send("Internal Server Error")
+}
+
 module.exports = {
   validateTodoInput,
-  authenticateToken
+  authenticateToken,
+  handle404,
+  handle500
 };

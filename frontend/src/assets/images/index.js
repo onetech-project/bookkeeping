@@ -11,6 +11,7 @@ import iconCommunity from './icon_community.svg';
 import iconHealth from './icon_health.svg';
 import iconRetirement from './icon_retirement.svg';
 import logo from './logo.png';
+import bgLanding from './bg-landing.webp';
 
 export {
   logoBlackNoBgPng,
@@ -25,5 +26,6 @@ export {
   iconCommunity,
   iconHealth,
   iconRetirement,
-  logo
+  logo,
+  bgLanding
 }
