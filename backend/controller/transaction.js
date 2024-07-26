@@ -22,7 +22,7 @@ exports.get = (req, res) => {
   
   connection.query(queryString, (error, results) => {
     if (error) return res.status(500).send(`${error.code}: ${error.message}`);
-    connection.query('SELECT CEILING(COUNT(*) / ?) AS total_pages FROM transactions', [size], (e, r) => {
+    connection.query(`SELECT CEILING(COUNT(*) / ?) AS total_pages FROM transactions WHERE ${where.join('AND')}`, [size], (e, r) => {
       if (e) res.status(500).send(`${e.code}: ${e.message}`);
       return res.json({ data: results, totalPages: Number(r[0].total_pages) });
     })
