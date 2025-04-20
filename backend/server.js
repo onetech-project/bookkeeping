@@ -26,9 +26,9 @@ app.use(handle500);
 
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-  // setTimeout(function () {
-  //   process.send('ready');
-  // }, 1000);
+  setTimeout(function () {
+    process.send('ready');
+  }, 1000);
 });
 
 function cleanupAndExit() {

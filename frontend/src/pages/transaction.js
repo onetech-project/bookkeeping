@@ -26,7 +26,7 @@ const App = () => {
   const [size, setSize] = useState(10);
   const [page, setPage] = useState(1);
   const { category } = useParams();
-  const { loggedIn, setLoggedIn } = useContext(AppContext);
+  const { loggedIn, setLoggedIn, isAdmin, setIsAdmin } = useContext(AppContext);
 
   useEffect(() => {
     handleSearch()
@@ -38,7 +38,6 @@ const App = () => {
         setTotal(res.data.total);
       })
       .catch(error => {
-        console.log(error.response.data)
         showToast('error', JSON.stringify(error.response.data));
       });
   }, [transactions])
@@ -72,8 +71,8 @@ const App = () => {
         if (error.response.status === 403) {
           localStorage.removeItem('token');
           setLoggedIn(false);
+          setIsAdmin(false);
         }
-        console.log(error.response.data);
         let message = error.response.data;
         if (error.response.data?.message) {
           message = (
@@ -102,7 +101,6 @@ const App = () => {
         setTransactions(res.data);
       })
       .catch(error => {
-        console.log(error.response.data)
         showToast('error', JSON.stringify(error.response.data));
       });
   };
@@ -149,10 +147,10 @@ const App = () => {
       </div>
     </form>
   )
-  
+
   const ModalForm = () => (
-    <Modal 
-      show={show.show} 
+    <Modal
+      show={show.show}
       onHide={() => {
         setShow({ show: false });
         resetForm();
@@ -175,7 +173,7 @@ const App = () => {
 
   const FilterForm = () => (
     <div className='row'>
-      <div className={`mb-3 ${loggedIn ? 'col-10' : 'col-12' }  col-lg-3 col-md-6`}>
+      <div className={`mb-3 ${loggedIn ? 'col-10' : 'col-12'}  col-lg-3 col-md-6`}>
         <input
           className="form-control shadow-sm"
           id="filter-date-from"
@@ -185,7 +183,7 @@ const App = () => {
           onChange={e => setFilterMonth(e.target.value)}
         />
       </div>
-      {loggedIn && (
+      {loggedIn && isAdmin && (
         <div className='col-2 col-md-6 col-lg-9'>
           <button type="button" onClick={() => setShow({ show: true, type: 'add' })} className='btn btn-danger float-end'>+<span className='d-none d-md-inline d-lg-inline'> Tambah Transaksi</span></button>
         </div>
@@ -202,8 +200,8 @@ const App = () => {
         if (error.response.status === 403) {
           localStorage.removeItem('token');
           setLoggedIn(false);
+          setIsAdmin(false);
         }
-        console.log(error.response.data);
         showToast('error', JSON.stringify(error.response.data));
       });
   }
@@ -224,7 +222,7 @@ const App = () => {
         <div className='row py-4'>
           <div className='align-content-center'><h3 className='text-capitalize'>{categories[category]}</h3></div>
         </div>
-        <p className='col-12 col-md-6 col-lg-6'>Total Saldo Hingga {moment().format('MMMM')}: <strong>{currencyFormatter.format(total)}</strong></p>        
+        <p className='col-12 col-md-6 col-lg-6'>Total Saldo Hingga {moment().format('MMMM')}: <strong>{currencyFormatter.format(total)}</strong></p>
         <div>
           <FilterForm />
           <div className='table-responsive rounded rounded-top-3'>
@@ -245,7 +243,7 @@ const App = () => {
                     <td scope='row' colSpan={6} align='center'>NO DATA</td>
                   </tr>
                 )}
-                {transactions.data?.map((x,i) => (
+                {transactions.data?.map((x, i) => (
                   <tr key={x.id}>
                     <th scope='row'>{(i + ((page - 1) * size)) + 1}</th>
                     <td>{moment(x.date).format('DD MMM YYYY')}</td>
@@ -268,17 +266,17 @@ const App = () => {
           <nav aria-label="Page navigation example" className='d-flex flex-row justify-content-end align-items-start'>
             <select className='me-2 form-control' style={{ width: '5rem' }} name="size" id="size" value={size} onChange={e => setSize(e.target.value)}>
               {[...Array(5)].map((x, i) => (
-                <option key={i.toString()} value={(i+1) * 5}>{(i+1) * 5}</option>
+                <option key={i.toString()} value={(i + 1) * 5}>{(i + 1) * 5}</option>
               ))}
             </select>
             <ul className="pagination justify-content-end">
-              <li className={`page-item ${page === 1 ? 'disabled': ''}`}>
+              <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
                 <a className="page-link" onClick={() => setPage(page - 1)}>Previous</a>
               </li>
               {[...Array(transactions.totalPages)].map((x, i) => (
-                <li key={i.toString()} className="page-item"><a className={`page-link ${(i+1) === page ? 'active': ''}`} onClick={() => setPage(i+1)}>{i+1}</a></li>
+                <li key={i.toString()} className="page-item"><a className={`page-link ${(i + 1) === page ? 'active' : ''}`} onClick={() => setPage(i + 1)}>{i + 1}</a></li>
               ))}
-              <li className={`page-item ${page === transactions.totalPages ? 'disabled': ''}`}>
+              <li className={`page-item ${page === transactions.totalPages ? 'disabled' : ''}`}>
                 <a className="page-link" onClick={() => setPage(page + 1)}>Next</a>
               </li>
             </ul>
