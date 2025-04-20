@@ -234,7 +234,7 @@ const App = () => {
                   <th scope='col'>Tipe</th>
                   <th scope='col'>Jumlah</th>
                   <th scope='col'>Deskripsi</th>
-                  {loggedIn && <th scope='col'></th>}
+                  {loggedIn && isAdmin && <th scope='col'></th>}
                 </tr>
               </thead>
               <tbody className="table-group-divider">
@@ -250,7 +250,7 @@ const App = () => {
                     <td>{typeObj[x.type]}</td>
                     <td>{currencyFormatter.format(x.amount)}</td>
                     <td>{x.description}</td>
-                    {loggedIn && (
+                    {loggedIn && isAdmin && (
                       <td>
                         <div className='btn-group'>
                           <button type='button' className='btn btn-sm btn-primary' onClick={() => handleEdit(x)}><i className="bi bi-pencil"></i></button>
