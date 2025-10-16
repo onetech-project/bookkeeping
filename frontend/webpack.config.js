@@ -39,10 +39,10 @@ module.exports={
         /** "static" 
          * This property tells Webpack what static file it should serve
         */
-        static: {
-          directory: path.join(__dirname, 'dist'),
-          directory: path.join(__dirname, 'public'),
-        },
+        static: [
+          { directory: path.join(__dirname, 'dist') },
+          { directory: path.join(__dirname, 'public') }
+        ],
         /** "open" 
          * opens the browser after server is successfully started
         */
